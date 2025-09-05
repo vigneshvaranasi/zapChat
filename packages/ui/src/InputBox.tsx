@@ -14,7 +14,7 @@ function InputBox (
 { placeholder, value, onChange, varient = 'primary', text, onClick }: InputBoxProps
 ) {
   return (
-    <div className='ui:flex  ui:items-center  ui:border  ui:border-[#4a4a4a]  ui:p-1  ui:rounded-lg  ui:bg-[#2e2e2e]'>
+    <div className='ui:flex ui:justify-between  ui:items-center  ui:border  ui:border-[#4a4a4a]  ui:p-1  ui:rounded-lg  ui:bg-[#2e2e2e]'>
       <input
         type='text'
         placeholder={placeholder}

@@ -3,6 +3,9 @@ import { useEffect, use, useState, useRef } from 'react'
 import toast from 'react-hot-toast'
 import { useRouter } from 'next/navigation'
 import { wsURL } from '../config'
+import Button from '@repo/ui/Button'
+import InputBox from '@repo/ui/InputBox'
+import ChatBubble from './ChatBubble'
 
 export default function ChatPage ({
   params
@@ -18,6 +21,7 @@ export default function ChatPage ({
     []
   )
   const [joinCount, setJoinCount] = useState(0)
+  const [inputMessage, setInputMessage] = useState('')
 
   // Validate room code early
   useEffect(() => {
@@ -62,8 +66,7 @@ export default function ChatPage ({
       console.log('WS message', msg)
       if (msg.type === 'messagePing') {
         setMessages(prev => [...prev, { from: msg.from, message: msg.message }])
-      }
-      else if (msg.type === 'cntPing') {
+      } else if (msg.type === 'cntPing') {
         setJoinCount(msg.message)
       }
     }
@@ -85,23 +88,61 @@ export default function ChatPage ({
   }, [username, roomCode])
 
   return (
-    <div className='p-6'>
-      <h1 className='text-2xl font-semibold mb-4'>Room: {roomCode}</h1>
-      <p className='text-sm text-gray-400'>
-        Username: {username || '(setting...)'}
-      </p>
-      <p className='text-xs text-gray-500'>WS URL: {wsURL || 'NOT SET'}</p>
-      {
-        socketRef.current?.readyState === WebSocket.OPEN && (
-          <div className='mt-4 space-y-2'>
-            {messages.map((msg, idx) => (
-              <div key={idx} className='p-2 border rounded'>
-                <strong>{msg.from}:</strong> {msg.message}
-              </div>
-            ))}
-          </div>
-        )
-      }
+    <div className='p-6 flex flex-col h-screen'>
+      {/* to do: Navbar */}
+      <div className='border border-[#353636] w-full  sm:max-w-3xl rounded-xl mx-auto mb-4 flex justify-between items-center px-4 py-2'>
+        <p className='text-lg text-[#CFCFCF]'>ZapChat</p>
+        <Button
+          onClick={() => {
+            navigator.clipboard.writeText(window.location.href)
+            toast.success('Copied to clipboard')
+          }}
+          varient='primary'
+          text='Invite'
+        />
+      </div>
+      {/* Chat Interface */}
+      <div className='flex-1 flex flex-col min-h-0 w-full sm:w-md mx-auto rounded-xl bg-[#262626] border border-[#353636]'>
+        {/* room code & leave */}
+        <div className='flex justify-between items-center border-b border-[#353636] p-3 px-4'>
+          <p>Room Code: {roomCode}</p>
+          <Button
+            text='Leave'
+            varient='danger'
+            onClick={() => {
+              router.push('/')
+              toast.success('Left the room')
+            }}
+          />
+        </div>
+        {/* messages */}
+        <div className='flex-1 min-h-0 px-4 overflow-y-auto py-3 space-y-2'>
+          <ChatBubble message='Hiii... Hello' varient='received' from='Vignesh' />
+          <ChatBubble message='Hey' varient='sent' />
+          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
+          <ChatBubble message='Hey' varient='sent' />
+          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
+          <ChatBubble message='Hey' varient='sent' />
+          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
+          <ChatBubble message='Hey' varient='sent' />
+          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
+          <ChatBubble message='Hey' varient='sent' />
+          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
+          <ChatBubble message='Hey' varient='sent' />
+        </div>
+        {/* chat input */}
+        <div className='p-4'>
+          <InputBox
+            placeholder='Type a message...'
+            onClick={() => {
+              toast.success('Message Sent')
+            }}
+            value={inputMessage}
+            onChange={(value: string) => setInputMessage(value)}
+            varient='chat'
+          />
+        </div>
+      </div>
     </div>
   )
 }

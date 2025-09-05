@@ -1,16 +1,17 @@
 'use client'
 type ButtonProps = {
-  varient: 'primary' | 'chat'
+  varient: 'primary' | 'chat' | 'danger'
   text?: string
   onClick: () => void
 }
 
 function Button ({ varient = 'primary', text, onClick }: ButtonProps) {
-  let common = 'ui:bg-gray-100 ui:text-black ui:cursor-pointer'
+  let common = 'ui:bg-[#CFCFCF] ui:text-black ui:cursor-pointer'
 
   let varinets = {
     primary: 'ui:p-1 ui:px-4 ui:rounded-lg',
-    chat: 'ui:rounded-full ui:p-2'
+    chat: 'ui:rounded-full ui:p-2',
+    danger: 'ui:p-1 ui:px-4 ui:rounded-lg ui:hover:bg-red-300 ui:tarnsition-all ui:duration-300'
   }
 
   return (
