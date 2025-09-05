@@ -22,6 +22,7 @@ export default function ChatPage ({
   )
   const [joinCount, setJoinCount] = useState(0)
   const [inputMessage, setInputMessage] = useState('')
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null)
 
   // Validate room code early
   useEffect(() => {
@@ -110,6 +111,13 @@ export default function ChatPage ({
     setInputMessage('')
   }
 
+  // Auto scroll to bottom
+  useEffect(() => {
+    const el = messagesContainerRef.current
+    if (!el) return
+    el.scrollTop = el.scrollHeight
+  }, [messages])
+
   return (
     <div className='p-6 flex flex-col h-screen'>
       {/* to do: Navbar */}
@@ -139,7 +147,10 @@ export default function ChatPage ({
           <p>Users: {joinCount}</p>
         </div>
         {/* messages */}
-        <div className='flex-1 min-h-0 px-4 overflow-y-auto hide-scrollbar py-3 space-y-2'>
+        <div
+          ref={messagesContainerRef}
+          className='flex-1 min-h-0 px-4 overflow-y-auto hide-scrollbar py-3 space-y-2'
+        >
           {messages.length === 0 ? (
             <p className='text-center text-gray-400 mt-10'>
               No messages yet. Say hi!
