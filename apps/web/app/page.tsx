@@ -49,6 +49,7 @@ function Page () {
         varient='primary'
         onClick={handleJoinChat}
         text='Join'
+        handleEnter={true}
       />
     </div>
   )

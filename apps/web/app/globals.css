@@ -24,3 +24,21 @@ body {
     )
     rgb(var(--background-start-rgb));
 }
+
+/* hide scrollbars */
+.hide-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+}
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+/* hide global page scrollbars too */
+/* html, body { */
+/*   -ms-overflow-style: none; */
+/*   scrollbar-width: none; */
+/* } */
+/* html::-webkit-scrollbar, body::-webkit-scrollbar { */
+/*   display: none; */
+/* } */

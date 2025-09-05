@@ -61,19 +61,25 @@ function handleChat (socket: WebSocket, payload: any) {
   if (!room.clients.find(c => c.socket === socket)) {
     return socket.send(JSON.stringify({ error: 'You are not in this room' }))
   }
-  broadcast(payload.roomCode, payload.message, payload.username, 'messagePing')
+  broadcast(payload.roomCode, payload.message, payload.from, 'messagePing', socket)
 }
 
 function broadcast (
   roomCode: string,
   message: string,
   from: string,
-  type: string
+  type: string,
+  socket?: WebSocket
 ) {
   const room = ROOMS.get(roomCode)
   if (!room) return
   room.clients.forEach(c => {
-    if (c.socket.readyState === WebSocket.OPEN) {
+    if (c.socket.readyState !== WebSocket.OPEN) return
+    if (type === 'messagePing') {
+      // Skip the sender's socket
+      if (c.socket === socket) return
+      c.socket.send(JSON.stringify({ type, from, message }))
+    } else {
       c.socket.send(JSON.stringify({ type, from, message }))
     }
   })

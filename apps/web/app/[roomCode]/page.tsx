@@ -87,11 +87,41 @@ export default function ChatPage ({
     }
   }, [username, roomCode])
 
+  // Handle sending message
+  function sendMessage () {
+    const trimmed = inputMessage.trim()
+    if (!trimmed) return
+    setMessages(prev => [...prev, { from: username, message: trimmed }])
+    try {
+      socketRef.current?.send(
+        JSON.stringify({
+          type: 'chat',
+          payload: {
+            roomCode,
+            message: trimmed,
+            from: username
+          }
+        })
+      )
+    } catch (e) {
+      toast.error('Send failed')
+      setMessages(prev => prev.slice(0, -1))
+    }
+    setInputMessage('')
+  }
+
   return (
     <div className='p-6 flex flex-col h-screen'>
       {/* to do: Navbar */}
       <div className='border border-[#353636] w-full  sm:max-w-3xl rounded-xl mx-auto mb-4 flex justify-between items-center px-4 py-2'>
-        <p className='text-lg text-[#CFCFCF]'>ZapChat</p>
+        <p
+          onClick={() => {
+            router.push('/')
+          }}
+          className='text-lg text-[#CFCFCF] cursor-pointer'
+        >
+          ZapChat
+        </p>
         <Button
           onClick={() => {
             navigator.clipboard.writeText(window.location.href)
@@ -106,40 +136,38 @@ export default function ChatPage ({
         {/* room code & leave */}
         <div className='flex justify-between items-center border-b border-[#353636] p-3 px-4'>
           <p>Room Code: {roomCode}</p>
-          <Button
-            text='Leave'
-            varient='danger'
-            onClick={() => {
-              router.push('/')
-              toast.success('Left the room')
-            }}
-          />
+          <p>Users: {joinCount}</p>
         </div>
         {/* messages */}
-        <div className='flex-1 min-h-0 px-4 overflow-y-auto py-3 space-y-2'>
-          <ChatBubble message='Hiii... Hello' varient='received' from='Vignesh' />
-          <ChatBubble message='Hey' varient='sent' />
-          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
-          <ChatBubble message='Hey' varient='sent' />
-          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
-          <ChatBubble message='Hey' varient='sent' />
-          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
-          <ChatBubble message='Hey' varient='sent' />
-          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
-          <ChatBubble message='Hey' varient='sent' />
-          <ChatBubble message='Hiii...' varient='received' from='Vignesh' />
-          <ChatBubble message='Hey' varient='sent' />
+        <div className='flex-1 min-h-0 px-4 overflow-y-auto hide-scrollbar py-3 space-y-2'>
+          {messages.length === 0 ? (
+            <p className='text-center text-gray-400 mt-10'>
+              No messages yet. Say hi!
+            </p>
+          ) : (
+            messages.map((msg, index) => (
+              <div className='flex flex-col w-full' key={index}>
+                <ChatBubble
+                  key={index}
+                  varient={msg.from === username ? 'sent' : 'received'}
+                  message={msg.message}
+                  from={msg.from === username ? undefined : msg.from}
+                />
+              </div>
+            ))
+          )}
         </div>
         {/* chat input */}
         <div className='p-4'>
           <InputBox
             placeholder='Type a message...'
             onClick={() => {
-              toast.success('Message Sent')
+              sendMessage()
             }}
             value={inputMessage}
             onChange={(value: string) => setInputMessage(value)}
             varient='chat'
+            handleEnter={true}
           />
         </div>
       </div>
