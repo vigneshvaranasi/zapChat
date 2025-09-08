@@ -24,6 +24,7 @@ function InputBox (
         className='ui:focus:outline-none  ui:p-2  ui:rounded-lg ui:w-full'
         onKeyDown={e => {
           if (handleEnter && e.key === 'Enter') {
+            e.preventDefault()
             onClick()
           }
         }}
