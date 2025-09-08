@@ -6,8 +6,12 @@ import { wsURL } from '../config'
 import Button from '@repo/ui/Button'
 import InputBox from '@repo/ui/InputBox'
 import ChatBubble from '@repo/ui/ChatBubble'
-import type { WsMessage, WsCntPingMessage, WsMessagePingMessage, WsChatMessage } from '@repo/types'
-
+import type {
+  WsMessage,
+  WsCntPingMessage,
+  WsMessagePingMessage
+} from '@repo/types'
+import { motion } from 'framer-motion'
 
 export default function ChatPage ({
   params
@@ -19,7 +23,9 @@ export default function ChatPage ({
   const [username, setUsername] = useState<string>('')
   const socketRef = useRef<WebSocket | null>(null)
   const joinedRef = useRef<boolean>(false)
-  const [messages, setMessages] = useState<WsMessagePingMessage['payload'][]>([])
+  const [messages, setMessages] = useState<WsMessagePingMessage['payload'][]>(
+    []
+  )
   const [joinCount, setJoinCount] = useState<number>(0)
   const [inputMessage, setInputMessage] = useState<string>('')
   const messagesContainerRef = useRef<HTMLDivElement | null>(null)
@@ -93,7 +99,10 @@ export default function ChatPage ({
   function sendMessage () {
     const trimmed = inputMessage.trim()
     if (!trimmed) return
-    const newMessage: WsMessagePingMessage['payload'] = { from: username, message: trimmed }
+    const newMessage: WsMessagePingMessage['payload'] = {
+      from: username,
+      message: trimmed
+    }
     setMessages(prev => [...prev, newMessage])
     try {
       const chatMessage = {
@@ -121,8 +130,11 @@ export default function ChatPage ({
 
   return (
     <div className='p-6 flex flex-col h-screen'>
-      {/* to do: Navbar */}
-      <div className='border border-[#353636] w-full  sm:max-w-3xl rounded-xl mx-auto mb-4 flex justify-between items-center px-4 py-2'>
+      <motion.div
+        initial={{ opacity: 0, y: -50 }}
+        animate={{ opacity: 1, y: 0 }}
+        className='border border-[#353636] w-full  sm:max-w-3xl rounded-xl mx-auto mb-4 flex justify-between items-center px-4 py-2'
+      >
         <p
           onClick={() => {
             router.push('/')
@@ -139,9 +151,15 @@ export default function ChatPage ({
           varient='primary'
           text='Invite'
         />
-      </div>
+      </motion.div>
+
       {/* Chat Interface */}
-      <div className='flex-1 flex flex-col min-h-0 w-full sm:w-md mx-auto rounded-xl bg-[#262626] border border-[#353636]'>
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+        className='flex-1 flex flex-col min-h-0 w-full sm:w-md mx-auto rounded-xl bg-[#262626] border border-[#353636]'
+      >
         {/* room code & leave */}
         <div className='flex justify-between items-center border-b border-[#353636] p-3 px-4'>
           <p>Room Code: {roomCode}</p>
@@ -182,7 +200,7 @@ export default function ChatPage ({
             handleEnter={true}
           />
         </div>
-      </div>
+      </motion.div>
     </div>
   )
 }
