@@ -12,6 +12,8 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@repo/types": "*",
+    "@repo/eslint-config": "*",
     "@types/ws": "^8.18.1",
     "ws": "^8.18.3"
   }

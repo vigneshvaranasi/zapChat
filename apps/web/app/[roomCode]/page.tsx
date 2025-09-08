@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation'
 import { wsURL } from '../config'
 import Button from '@repo/ui/Button'
 import InputBox from '@repo/ui/InputBox'
-import ChatBubble from './ChatBubble'
+import ChatBubble from '@repo/ui/ChatBubble'
+import type { WsMessage, WsCntPingMessage, WsMessagePingMessage, WsChatMessage } from '@repo/types'
+
 
 export default function ChatPage ({
   params
@@ -14,14 +16,12 @@ export default function ChatPage ({
 }) {
   const { roomCode } = use(params)
   const router = useRouter()
-  const [username, setUsername] = useState('')
+  const [username, setUsername] = useState<string>('')
   const socketRef = useRef<WebSocket | null>(null)
-  const joinedRef = useRef(false)
-  const [messages, setMessages] = useState<{ from: string; message: string }[]>(
-    []
-  )
-  const [joinCount, setJoinCount] = useState(0)
-  const [inputMessage, setInputMessage] = useState('')
+  const joinedRef = useRef<boolean>(false)
+  const [messages, setMessages] = useState<WsMessagePingMessage['payload'][]>([])
+  const [joinCount, setJoinCount] = useState<number>(0)
+  const [inputMessage, setInputMessage] = useState<string>('')
   const messagesContainerRef = useRef<HTMLDivElement | null>(null)
 
   // Validate room code early
@@ -53,26 +53,27 @@ export default function ChatPage ({
     ws.onopen = () => {
       if (joinedRef.current) return
       joinedRef.current = true
-      ws.send(
-        JSON.stringify({
-          type: 'join',
-          payload: { roomCode: roomCode, username: username }
-        })
-      )
+      const joinMessage = {
+        type: 'join' as const,
+        payload: { roomCode: roomCode, username: username }
+      }
+      ws.send(JSON.stringify(joinMessage))
       toast.success(`Joined ${roomCode}`)
     }
 
-    ws.onmessage = evt => {
-      const msg = JSON.parse(evt.data)
+    ws.onmessage = (evt: MessageEvent) => {
+      const msg: WsMessage = JSON.parse(evt.data)
       console.log('WS message', msg)
       if (msg.type === 'messagePing') {
-        setMessages(prev => [...prev, { from: msg.from, message: msg.message }])
+        const pingMsg = msg as WsMessagePingMessage
+        setMessages(prev => [...prev, pingMsg.payload])
       } else if (msg.type === 'cntPing') {
-        setJoinCount(msg.message)
+        const cntMsg = msg as WsCntPingMessage
+        setJoinCount(cntMsg.payload.count)
       }
     }
 
-    ws.onerror = e => {
+    ws.onerror = (e: Event) => {
       console.error('WS error', e)
       toast.error('WebSocket error')
     }
@@ -92,18 +93,18 @@ export default function ChatPage ({
   function sendMessage () {
     const trimmed = inputMessage.trim()
     if (!trimmed) return
-    setMessages(prev => [...prev, { from: username, message: trimmed }])
+    const newMessage: WsMessagePingMessage['payload'] = { from: username, message: trimmed }
+    setMessages(prev => [...prev, newMessage])
     try {
-      socketRef.current?.send(
-        JSON.stringify({
-          type: 'chat',
-          payload: {
-            roomCode,
-            message: trimmed,
-            from: username
-          }
-        })
-      )
+      const chatMessage = {
+        type: 'chat' as const,
+        payload: {
+          roomCode,
+          message: trimmed,
+          from: username
+        }
+      }
+      socketRef.current?.send(JSON.stringify(chatMessage))
     } catch (e) {
       toast.error('Send failed')
       setMessages(prev => prev.slice(0, -1))
